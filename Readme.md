@@ -1,0 +1,1 @@
+This is an Arduino based controller for an endurance tester for a feedback sensor.  The controller monitors a control sensor and compares it to the sensor under test.  If a discrepancy occurs, it shuts down the motor.  The controller also sends out a string of test results to a serial terminal on a PC to monitor the number of turns completed by the test.
