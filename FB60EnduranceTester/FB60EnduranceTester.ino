@@ -3,11 +3,12 @@
 #include <avr/eeprom.h>
 
 // Constants:
-LiquidCrystal lcd(6, 7, 8, 9, 10, 11);           // LCD I/O assignments
-const unsigned long EventInterval = 60;          // Send event string every 60 seconds
-const unsigned int SensorPPR = 60;               // DUT sensor pulses per revolution
-const unsigned int SensorRotationError = 2;      // If there are more than this much difference in counts, the test stops
-const unsigned int MinimumTesterRPM = 300;       // If RPM drops below this value, the test stops
+LiquidCrystal lcd(6, 7, 8, 9, 10, 11);                   // LCD I/O assignments
+const unsigned long EventInterval = 60;                  // Send event string every 60 seconds
+const unsigned int SensorPPR = 60;                       // DUT sensor pulses per revolution
+const unsigned int SensorRotationError = 2;              // If there are more than this much difference in counts, the test stops
+const unsigned int MinimumTesterRPM = 300;               // If RPM drops below this value, the test stops
+const unsigned long NumberOfRotationsToTest = 100000;    // Sets the number of rotations to run before stopping the test
 
 // Global Variables:
 char SerialCommand;                              // Character buffer from serial port
@@ -81,7 +82,7 @@ void loop()
     }  
   }
   
-  // Check for someone pressing the mode button:
+  // Check for someone pressing the On/Off button:
   ButtonState = digitalRead(PushButton);
   
   if(ButtonState ==0 && LastButtonState ==1)
@@ -117,6 +118,22 @@ void loop()
       SetMotor(LOW);
     }
     
+// Check number of revolutions to see if we should stop the test
+    if (ShaftRotations >= NumberOfRotationsToTest)
+    {
+      Serial.println("Test stopped at predetermined number of revolutions");
+      Serial.print("Shaft Rotations: ");
+      Serial.println(ShaftRotations);
+      Serial.print("Sensor Rotations: ");
+      Serial.println(SensorRotations);
+      
+      ShaftRotations = 0;        // Reset these for the next test
+      SensorRotations =  0;
+      
+      TestRunning = 0;
+      SetMotor(LOW);
+    }
+
 // Check for adequate RPM and stop the test if speed is too low
   //not sure how to do this, since we have to account for stopping and starting...
 
